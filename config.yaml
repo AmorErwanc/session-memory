@@ -1,0 +1,29 @@
+# session-memory 项目配置
+#
+# 这里定义了哪些"项目"被纳入扫描,以及它们的根目录。
+# 添加新项目时,在 projects 下加一项即可。
+
+projects:
+  party:
+    root: /Users/edy/project/party
+    description: 造梦次元 - 多人 AI 角色互动派对功能
+
+  # 示例:以后加新项目
+  # dream-music:
+  #   root: /Users/edy/project/dream-music
+  #   description: AI 音乐生成模块
+
+# 默认运行参数(可被 CLI 参数覆盖)
+defaults:
+  model: opus           # L1 使用的模型(sonnet/opus)
+  concurrency: 8        # 并发 worker 数
+
+# 数据目录(相对项目根)
+paths:
+  data: data
+  sessions: data/sessions       # L0.5 产出
+  digests_raw: data/digests/raw # L1.1 产出
+  digests_cleaned: data/digests/cleaned  # L1.2 产出
+  events: data/events           # L2 产出(待开发)
+  tmp: tmp
+  logs: logs

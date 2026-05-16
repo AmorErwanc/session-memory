@@ -1,0 +1,32 @@
+# Data 产出(可能很大,不入库)
+data/sessions/**/*.yaml
+data/sessions/**/*.yml
+data/digests/**/*.yaml
+data/digests/**/*.yml
+data/events/**/*.yaml
+data/events/**/*.yml
+
+# 日志和临时
+logs/*.log
+logs/*.txt
+tmp/*
+!tmp/.gitkeep
+!logs/.gitkeep
+!data/sessions/.gitkeep
+!data/digests/.gitkeep
+!data/events/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.uv/
+*.egg-info/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
