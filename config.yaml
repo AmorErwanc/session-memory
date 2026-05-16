@@ -7,6 +7,12 @@ projects:
   party:
     root: /Users/edy/project/party
     description: 造梦次元 - 多人 AI 角色互动派对功能
+    # 默认 startswith 匹配,包含 worktrees 等子目录
+
+  home:
+    root: /Users/edy
+    description: home 目录散对话(不属于具体项目的)
+    strict: true   # 严格匹配,cwd 必须完全等于 root,不含子目录
 
   # 示例:以后加新项目
   # dream-music:

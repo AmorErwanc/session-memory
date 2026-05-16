@@ -81,8 +81,12 @@ def extract(path: Path) -> dict:
     return deduplicate_cwd(data)
 
 
-def is_session_in_project(path: Path, project_root: str) -> bool:
-    """快速检查 codex session 的 cwd 是否在指定项目根目录下。"""
+def is_session_in_project(path: Path, project_root: str, strict: bool = False) -> bool:
+    """快速检查 codex session 的 cwd 是否在指定项目根目录下。
+
+    strict=False(默认):startswith 匹配,包含子目录
+    strict=True:严格匹配,cwd 必须完全等于 project_root
+    """
     import json
     try:
         with path.open() as f:
@@ -93,6 +97,8 @@ def is_session_in_project(path: Path, project_root: str) -> bool:
         if d.get("type") != "session_meta":
             return False
         cwd = d.get("payload", {}).get("cwd", "")
+        if strict:
+            return cwd == project_root
         return cwd.startswith(project_root)
     except Exception:
         return False

@@ -114,8 +114,12 @@ def extract(
     project_root = _project_root(project)
     out_dir = _path(project, "sessions")
 
+    # 读 strict 配置(默认 False)
+    cfg = _load_config()
+    strict = cfg.get("projects", {}).get(project, {}).get("strict", False)
+
     stats = extract_project(project, project_root, out_dir,
-                            force=force, workers=workers)
+                            force=force, workers=workers, strict=strict)
     typer.echo(f"\n✅ 完成 — {stats}")
 
 

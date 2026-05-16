@@ -14,8 +14,12 @@ CLAUDE_PROJECTS_DIR = Path("/Users/edy/.claude/projects")
 CODEX_SESSIONS_DIR = Path("/Users/edy/.codex/sessions")
 
 
-def find_claude_files(project_root: str) -> list[Path]:
-    """找所有 Claude jsonl,文件夹名以转义后的 project_root 开头。"""
+def find_claude_files(project_root: str, strict: bool = False) -> list[Path]:
+    """找所有 Claude jsonl。
+
+    strict=False(默认):startswith 匹配,包含子目录(如 worktrees)
+    strict=True:严格匹配,cwd 必须完全等于 project_root
+    """
     # /Users/edy/project/party → -Users-edy-project-party
     folder_prefix = project_root.replace("/", "-")
     files = []
@@ -24,19 +28,24 @@ def find_claude_files(project_root: str) -> list[Path]:
     for d in sorted(CLAUDE_PROJECTS_DIR.iterdir()):
         if not d.is_dir():
             continue
-        if not d.name.startswith(folder_prefix):
-            continue
+        if strict:
+            if d.name != folder_prefix:
+                continue
+        else:
+            if not d.name.startswith(folder_prefix):
+                continue
         for f in sorted(d.glob("*.jsonl")):
             files.append(f)
     return files
 
 
-def find_codex_files(project_root: str) -> list[Path]:
-    """找所有 cwd 在 project_root 下的 codex jsonl。"""
+def find_codex_files(project_root: str, strict: bool = False) -> list[Path]:
+    """找所有 cwd 在 project_root 下的 codex jsonl(同 strict 语义)。"""
     if not CODEX_SESSIONS_DIR.exists():
         return []
     candidates = sorted(CODEX_SESSIONS_DIR.rglob("*.jsonl"))
-    return [f for f in candidates if codex_extract.is_session_in_project(f, project_root)]
+    return [f for f in candidates
+            if codex_extract.is_session_in_project(f, project_root, strict=strict)]
 
 
 def _process_one(args):
@@ -68,7 +77,7 @@ def _process_one(args):
 
 
 def extract_project(project_name: str, project_root: str, out_dir: Path,
-                    force: bool = False, workers: int = 8):
+                    force: bool = False, workers: int = 8, strict: bool = False):
     """
     扫指定项目的所有 session jsonl 并抽取为 yaml。
 
@@ -88,9 +97,10 @@ def extract_project(project_name: str, project_root: str, out_dir: Path,
         for f in out_dir.glob("*.yaml"):
             f.unlink()
 
-    print(f"扫描 session 文件(项目: {project_name}, 根目录: {project_root})...")
-    claude_files = find_claude_files(project_root)
-    codex_files = find_codex_files(project_root)
+    mode_str = "strict" if strict else "包含子目录"
+    print(f"扫描 session 文件(项目: {project_name}, 根目录: {project_root}, 模式: {mode_str})...")
+    claude_files = find_claude_files(project_root, strict=strict)
+    codex_files = find_codex_files(project_root, strict=strict)
     print(f"  Claude: {len(claude_files)} 个 jsonl")
     print(f"  Codex:  {len(codex_files)} 个 jsonl")
     total = len(claude_files) + len(codex_files)
