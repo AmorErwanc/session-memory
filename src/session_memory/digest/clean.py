@@ -13,6 +13,17 @@ from ..utils.json_extract import extract_json
 from ..utils.yaml_io import dump_yaml, load_yaml
 
 
+def _save_raw_debug(raw: str, stem: str, suffix: str):
+    """失败时把 raw 写到 tmp/ 方便排查(跟 generate.py 行为一致)。"""
+    tmp_dir = Path("/Users/edy/program/session-memory/tmp")
+    tmp_dir.mkdir(parents=True, exist_ok=True)
+    debug_path = tmp_dir / f"l1clean_raw_{int(time.time()*1000)}_{stem[:30]}_{suffix}.txt"
+    try:
+        debug_path.write_text(raw)
+    except Exception:
+        pass
+
+
 def clean_one(digest_path: Path, out_path: Path, prompt: str,
               model: str = "opus", max_retries: int = 2,
               timeout: int = 300) -> dict:
@@ -40,6 +51,7 @@ def clean_one(digest_path: Path, out_path: Path, prompt: str,
         json_str = extract_json(raw)
         if json_str is None:
             last_err = f"no JSON; head: {raw[:200]!r}"
+            _save_raw_debug(raw, digest_path.stem, "nojson")
             if attempt < max_retries:
                 time.sleep(2)
             continue
@@ -48,12 +60,14 @@ def clean_one(digest_path: Path, out_path: Path, prompt: str,
             data = json.loads(json_str)
         except json.JSONDecodeError as e:
             last_err = f"JSON parse error: {e}"
+            _save_raw_debug(raw, digest_path.stem, "parseerror")
             if attempt < max_retries:
                 time.sleep(2)
             continue
 
         if not isinstance(data, dict):
             last_err = "not a dict"
+            _save_raw_debug(raw, digest_path.stem, "notdict")
             if attempt < max_retries:
                 time.sleep(2)
             continue

@@ -299,8 +299,9 @@ def failures(
         typer.echo("tmp/ 不存在")
         return
 
+    # 同时扫 L1.1 (l1_raw_*) 和 L1.2 (l1clean_raw_*)
     raw_files = sorted(
-        tmp_dir.glob("l1_raw_*.txt"),
+        list(tmp_dir.glob("l1_raw_*.txt")) + list(tmp_dir.glob("l1clean_raw_*.txt")),
         key=lambda f: f.stat().st_mtime,
         reverse=True,
     )
